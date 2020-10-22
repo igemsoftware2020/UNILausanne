@@ -5,7 +5,11 @@ Created on Thu Aug 20 09:05:55 2020
 @author: pablo
 """
 
-#Model to explore different options for cell division in our IBM
+#This model is for the final animation in our IBM 2D in a gut like environment
+#Note that the conditions in the gut are not fully known so some assumptions are not solid
+#Check our wiki (link in the readme of our repo) to see how we arived to this model
+#Although we finally just use one mode of division, there is a lot of options we explored, that´s why the division function has a lot of options
+
 
 #I import the packages I will use
 import numpy as np
@@ -14,6 +18,7 @@ import matplotlib.pyplot as plt
 import scipy
 from scipy.integrate import odeint
 from matplotlib import colors
+import pandas as pd
 
 #################
 # Repressilator #
@@ -25,8 +30,8 @@ def repressilator(z, t):
     p_tetR=z[1]
     p_cI=z[2]
     #
-    alpha,n, nIPTG, Kd=(216,3,2, 10^-10) #Parameters from Elowitz et al 2000.Except for Kd that is taken fro Daber et al 2007
-    dp_lacIdt = (alpha/(1+p_cI**n))*(1 - IPTG_0**nIPTG/(Kd**nIPTG + IPTG_0**nIPTG)) #In case we want to coordinate with IPTG
+    alpha,n, nIPTG, Kd=(216,2.4,1, 1e-10) #Parameters from Elowitz et al 2000.Except for Kd that is taken fro Daber et al 2007
+    dp_lacIdt = (alpha/(1+p_cI**n))*(1 - IPTG_0**nIPTG/(Kd + IPTG_0**nIPTG)) #In case we want to coordinate with IPTG
     
     #
     dp_tetRdt = alpha/(1+p_lacI**n)
@@ -47,27 +52,26 @@ def repressilator(z, t):
 IPTG_0=0
 death_rate=0
 grid_size=100 #here I set the grid size, which will be the number of rows and columsn of a square grid
-time_steps=91; time_step=0#numer of rounds and the initial round for the while loop
+time_steps=151; time_step=0#numer of rounds and the initial round for the while loop
 
-cell_0={"div":0, "rep":[0,10,0]} #in the repressilator we include [LacI,TetR,CI], we make up the initial values
+cell_0={"div":0, "rep":[0,200,0]} #in the repressilator we include [LacI,TetR,CI], we make up the initial values
 
 
 
 ## FUNCTIONS ##
 #--------------------------------------------------------------------------------------------------------------
 
+#cells will be put in the last row, which resembles the wall of the gut
 def initiation (number):
     var=0
     while var< number:
-        
         column= random.randint(0,grid_size-1)
-        if grid[50][50]==0: #CHANGE 50 BY COLUMN
-            grid[50][50]=cell_0.copy() #CHANGE 50 BY COLUMN
+        if grid[-1][column]==0: 
+            grid[-1][column]=cell_0.copy()
             var+=1
         else:
             pass
         
-
 
 #I create a list of directions that I will use for the division MODE 0
 direction_4= [[-1,0],[0,1],[1,0],[0,-1]]
@@ -83,10 +87,10 @@ def shove(row,column):
             if grid[(row_2+dir_[0])][(column_2+dir_[1])%grid_size]==0 and grid[row_2][column_2]!=0:#theoreically I shouldn need to ask the second condition,but was not working I dont know why´
                 grid[(row_2+dir_[0])][(column_2+dir_[1])%grid_size]=grid[row_2][column_2].copy()
                 grid[row_2][column_2]=grid[row][column].copy()
-                new_rep=[x/2 for x in grid[row][column]["rep"]]
-                variability=np.random.normal(1, 0.2, 1)[0]
+                new_rep=grid[row][column]["rep"]
+                variability=np.random.beta(50,50)
                 new_rep_1=[x*variability for x in new_rep]
-                new_rep_2=[x*(2-variability) for x in new_rep]
+                new_rep_2=[x*(1-variability) for x in new_rep]
                 grid[row_2][column_2]["rep"]=new_rep_2
                 grid[row][column]["rep"]=new_rep_1
                 break
@@ -105,12 +109,9 @@ def move(row,column):
 
 
 
-
-
-
-
-
+#In division I keep all the options, but depending on the mode we set, we will use one or the otherso docu
 def division(mode,row, column):
+    variability=np.random.beta(50,50) #this is for protein partition between daughter cells
     if mode==0:
         if random.uniform(0,1)<div_prob: #only excited cells (type 2)
             random.shuffle(direction)
@@ -119,10 +120,9 @@ def division(mode,row, column):
                     if grid[(row+dir_[0])%grid_size][(column+dir_[1])%grid_size]==0:
                         grid[row][column]["div"] += 1
                         grid[row+dir_[0]][(column+dir_[1])%grid_size]=grid[row][column].copy()
-                        new_rep=[x/2 for x in grid[row][column]["rep"]]
-                        variability=np.random.normal(1, 0.2, 1)[0]
+                        new_rep=grid[row][column]["rep"]
                         new_rep_1=[x*variability for x in new_rep]
-                        new_rep_2=[x*(2-variability) for x in new_rep]
+                        new_rep_2=[x*(1-variability) for x in new_rep]
                         grid[row+dir_[0]][(column+dir_[1])%grid_size]["rep"]=new_rep_2
                         grid[row][column]["rep"]=new_rep_1
                         break
@@ -135,10 +135,9 @@ def division(mode,row, column):
                     if grid[(row+dir_[0])%grid_size][(column+dir_[1])%grid_size]==0:
                         grid[row][column]["div"] += 1
                         grid[row+dir_[0]][(column+dir_[1])%grid_size]=grid[row][column].copy()
-                        new_rep=[x/2 for x in grid[row][column]["rep"]]
-                        variability=np.random.normal(1, 0.2, 1)[0]
+                        new_rep=grid[row][column]["rep"]
                         new_rep_1=[x*variability for x in new_rep]
-                        new_rep_2=[x*(2-variability) for x in new_rep]
+                        new_rep_2=[x*(1-variability) for x in new_rep]
                         grid[row+dir_[0]][(column+dir_[1])%grid_size]["rep"]=new_rep_2
                         grid[row][column]["rep"]=new_rep_1
                         could_divide +=1
@@ -154,10 +153,9 @@ def division(mode,row, column):
                 if grid[(row+a[0])][(column+a[1])%grid_size]==0:
                     grid[row][column]["div"] += 1
                     grid[(row+a[0])][(column+a[1])%grid_size]=grid[row][column].copy()
-                    new_rep=[x/2 for x in grid[row][column]["rep"]]
-                    variability=np.random.normal(1, 0.2, 1)[0]
+                    new_rep=grid[row][column]["rep"]
                     new_rep_1=[x*variability for x in new_rep]
-                    new_rep_2=[x*(2-variability) for x in new_rep]
+                    new_rep_2=[x*(1-variability) for x in new_rep]
                     grid[(row+a[0])][(column+a[1])%grid_size]["rep"]=new_rep_2
                     grid[row][column]["rep"]=new_rep_1.copy()
                 move(row,column)
@@ -173,10 +171,9 @@ def division(mode,row, column):
                         if grid[row+a][(column+b)%grid_size]==0:
                             grid[row][column]["div"] += 1
                             grid[row+a][(column+b)%grid_size]=grid[row][column].copy()
-                            new_rep=[x/2 for x in grid[row][column]["rep"]]
-                            variability=np.random.normal(1, 0.2, 1)[0]
+                            new_rep=grid[row][column]["rep"].copy()
                             new_rep_1=[x*variability for x in new_rep]
-                            new_rep_2=[x*(2-variability) for x in new_rep]
+                            new_rep_2=[x*(1-variability) for x in new_rep]
                             grid[row+a][(column+b)%grid_size]["rep"]=new_rep_2
                             grid[row][column]["rep"]=new_rep_1
                             grid[row+a][(column+b)%grid_size]=grid[row][column].copy()
@@ -197,13 +194,14 @@ def death(row, column):
 
 #How to plot the matrix
 #----------------------
-    #Even though we have cells as dictionaries, we need to just have some values to be able to plot the grid properly, what we do for now is basically check which is the higher protien of the three in the repressilator of a particular cell, and based on that assign 1, 2 or 3 to that particular position in the grid (only for plotting)
+
+#We have a function to plot cells according to the amount of each of the proteins
 def plotable_lacI(grid_0):
     grid_1 = [row[:] for row in grid_0]
     for r in range(grid_size):
         for c in range(grid_size):
             if grid_1[r][c] != 0:
-                grid_1[r][c]=grid_1[r][c]["rep"][0]
+                grid_1[r][c]=grid_1[r][c]["rep"][0]*40 #Because of the rescaling we do in the ODE model
     return grid_1
     
 def plotable_tetR(grid_0):
@@ -211,7 +209,7 @@ def plotable_tetR(grid_0):
     for r in range(grid_size):
         for c in range(grid_size):
             if grid_1[r][c] != 0:
-                grid_1[r][c]=grid_1[r][c]["rep"][1]
+                grid_1[r][c]=grid_1[r][c]["rep"][1]*40
     return grid_1
 
 def plotable_cI(grid_0):
@@ -219,9 +217,10 @@ def plotable_cI(grid_0):
     for r in range(grid_size):
         for c in range(grid_size):
             if grid_1[r][c] != 0:
-                grid_1[r][c]=grid_1[r][c]["rep"][2]
+                grid_1[r][c]=grid_1[r][c]["rep"][2]*40
     return grid_1
 
+# To colour cells according to the number of undergone divisions
 def plotable_div(grid_0):
     grid_1 = [row[:] for row in grid_0]
     for r in range(grid_size):
@@ -230,8 +229,7 @@ def plotable_div(grid_0):
                 grid_1[r][c]=grid_1[r][c]["div"]
     return grid_1
 
-
-
+# Just to plot where we have cells 
 def plotable(grid_0):
     grid_1 = [row[:] for row in grid_0]
     for r in range(grid_size):
@@ -239,14 +237,27 @@ def plotable(grid_0):
             if grid_1[r][c] != 0:
                 grid_1[r][c]=1
     return grid_1
+
+#THIS IS TO CALCULATE TOTAL AMOUNT OF AZURIN
+#If we assume that all the produced azurin is immediately secreted that´s the amount of azurin (number of proteins) released to the medium
+def azurin (grid_0):
+    grid_1 = [row[:] for row in grid_0]
+    counter=0
+    for r in range(grid_size):
+        for c in range(grid_size):
+            if grid_1[r][c] != 0:
+                counter+=grid_1[r][c]["rep"][2]*40
+    return counter
+
+
+
+# LET´S LOOP
 #--------------------------------------------------------------------------------------------------------------
-
-
-#All the options we want to try
-modes=[0.4,0.8,0.24,1,2.01,2.05,2.075,2.1,3.0101,3.0301,3.0501,3.0701,3.1001,3.0105,3.0305,3.0505,3.0705,3.1005]
-death_rates=[0,0.1,0.2,0.3]
-div_probs=[1,0.8,0.5,0.1]
-in_cells=1
+#I leace all the options here in case you want to loop thorugh different options, but all this can be simplified, as we are just using one option here
+modes=[3.1001]
+death_rates=[0.3]
+div_probs=[1]
+in_cells=50
 
 for mode in modes:
     for death_rate in death_rates:
@@ -254,7 +265,7 @@ for mode in modes:
             #We create the grid where cells will lie:
             grid = [ [ 0 for i in range(grid_size) ] for j in range(grid_size) ]
             
-            #DESCRIPTION OF DIVISION OPTIONS
+            #DESCRIPTION OF DIVISION OPTIONS (I just need this to adapt to the above functions, might not be the cleanest but at least works :P)
             #MODE=0, we will be looping in all those positions until we find an empty space
                     # Here we have to chose direction 4,8, or 24
     
@@ -321,10 +332,16 @@ for mode in modes:
             #################################
             
             #we initialte the grid with the number of cells we want:
-            initiation(1) #we initialise the matrix
+            initiation(in_cells) #we initialise the matrix
             time_step=0 #we set the time step to 0
             #Now perform the simulation, basically at each time step, each bacteria can die, run a bit the repressialtor, be activated or divide
+            total_azurin=[]
             while time_step<time_steps: #the simulation will run until the number of rounds previously set
+                #This in case we want to syncronize for a number of time steps with IPTG
+                if time_step<31:
+                    IPTG_0=0#0.00001
+                else:
+                    IPTG_0=0
                 grid_copy=np.copy(grid)#I copy the matrix to not loop and modify at the same time (this should be done in other way I think)
                 #I create this to loop in random order
                 size_1=list(range(grid_size))
@@ -337,25 +354,57 @@ for mode in modes:
                             if random.uniform(0, 1)<death_rate: #It will die if a random number is lower than the death rate we set (+ toxin presence in that position)
                                 death(i,z)
                             else:
-                                wi = odeint(repressilator, grid[i][z]["rep"], [0,5] )
+                                wi = odeint(repressilator, grid[i][z]["rep"], [0,0.7] )
                                 grid[i][z]["rep"]=wi[1]
                                 division(int(mode),i,z)
                 
-                if time_step%30==0: #I  print the matrix fro every 100, 200, 300....round, whenever the reminder equals 0!
-                    plt.imshow(plotable_cI(grid), cmap="magma")
+                if time_step%1==0: #I  print the matrix fro every time step in this case, whenever the reminder equals 0!
+                    #So to make the animation we just ploted each time step and then we converted it into a video using the following web: https://gifmaker.me/
+                    total_azurin.append(azurin(grid))
+                    
+                    #we want to plot cells in two plots: on the left by azurin amount and on the right by if there is a cell or not
+                    plt.subplot(1, 2, 1) 
+                    plt.imshow(plotable_cI(grid), cmap="viridis", vmin=0, vmax=2000)
                     plt.title("time: " + format(time_step))
-                    plt.colorbar()
-                    plt.savefig("201012/prot" + format(mode) + "_"+ format(div_prob) + "_" +format(death_rate)+"_" + format(in_cells)+ "_"+ format(time_step)+".png")
-                    plt.show()
-                     
-                    plt.imshow(plotable(grid), cmap="magma")
+                    plt.colorbar(fraction=0.046, pad=0.04, label='Azurin expression')
+                    
+                    plt.subplot(1, 2, 2)
+                    plt.imshow(plotable(grid), cmap="gray", vmin=0, vmax=1)
                     plt.title("time: " + format(time_step))
-                    plt.colorbar()
-                    plt.savefig("201012/cell" + format(mode) + "_"+ format(div_prob) + "_" +format(death_rate)+"_" + format(in_cells)+ "_"+ format(time_step)+".png")
-                    plt.show()
-                     
-                        
-                time_step+=1
+                    plt.colorbar(fraction=0.046, pad=0.04,ticks=range(2), label='Bacterium = 1')
                 
+                    
+                    plt.tight_layout()
+                    plt.title("time: " + format(time_step))
+                    #Set were we want to save it
+                    plt.savefig("201020_3/plots_IPTG_50" + format(mode) + "_"+ format(div_prob) + "_" +format(death_rate)+"_" + format(in_cells)+ "_"+ format(time_step)+".png")
+                    plt.show()
+                     
+     
+                    # Another plot for the total azurin secreted
+                    plt.plot(range(time_step+1), total_azurin, label="Azurin", color="b", lw=3)
+                    plt.xlim(0, time_steps)
+                    plt.ylim(0,3e7)
+                    plt.legend(fontsize=14,framealpha=0.5, loc= "upper right")
+                    plt.ylabel("total azurin release",fontsize=14)
+                    plt.xlabel("time step",fontsize=14)
+                    #plt.title("time: " + format(time_step), fontsize=14)
+                    plt.xticks(fontsize=13)
+                    plt.yticks(fontsize=13)
+                    plt.savefig("201020_3/azurin_IPTG_50" + format(mode) + "_"+ format(div_prob) + "_" +format(death_rate)+"_" + format(in_cells)+ "_"+ format(time_step)+".png")
+                  
+                    plt.show()
+                        
+                time_step+=1 #Once we have produced all we want we increase the time stepp and go back to the begining of the loop
+
+#In case we also want a static plot of the total azurin
+df=pd.DataFrame(total_azurin)
+df.to_csv("201020/total_azurin_IPTG_50_first.csv")      
+plt.plot(range(grid_size),df,label="azurin", color="b", lw=3)
+plt.legend(fontsize=12,framealpha=0.5, loc= "upper left")
+plt.xlim(0, time_steps)
+plt.xlabel("time steps",fontsize=14)
+plt.ylabel("total azurin release",fontsize=14)
+plt.show()
 
 

@@ -1,14 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-Created on Sat Sep 26 12:02:13 2020
+Created on Wed Aug 26 12:02:13 2020
 
 @author: pablo
 """
 
-#this aims to be a 1d simplification of the individual based model to assess how noise during bacterial division can affect the repressilator.
-#ok, so en the previous version I realised that if the noise I introduced was divide or not, the more noise the fewer the speed of division and thus the speed of oscillation. So now I will try that teh bias goes in both sides (a cell can divide, not divide or divide twice).
-
-
+#We did not have time to fully clean this script, still it works, for a better organization check "Surgaceplot_alpha_vs_integration_time.py" as it is basically the same and it is organised in a better way there and has clearer comments.
 
 #I import the packages I will use
 import numpy as np
@@ -26,7 +23,6 @@ from statistics import mean
 #count, bins, ignored = plt.hist(s, 3, normed=True)
 #plt.show()
 
-
 prob_division=[0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1]
 integration=[0.001,0.01,0.1,1,10,100]
 df = pd.DataFrame(0, columns = integration, index=prob_division)
@@ -42,7 +38,7 @@ for div_prob in prob_division:
             p_tetR=z[1]
             p_cI=z[2]
             #
-            alpha,n, nIPTG, Kd=( 216, 3, 2, 10^-10)
+            alpha,n, nIPTG, Kd=( 216, 2.4, 2, 10^-10)
             dp_lacIdt = (alpha/(1+p_cI**n))*(1 - IPTG_0**nIPTG/(Kd**nIPTG + IPTG_0**nIPTG))
             
             #
@@ -59,7 +55,7 @@ for div_prob in prob_division:
         ##########
         #div_prob=1 #from 0 to 1 (this should be somehow the inverse to my division probability in my 2D model)
         
-        initial_cell=[0,4,0]#this aims to be the state of the three cells of the repressilator
+        initial_cell=[0,10,0]#this aims to be the state of the three cells of the repressilator
         
         time_limit=100;time=0
         max_cells=1000 #this is our OD=0.4
@@ -78,7 +74,7 @@ for div_prob in prob_division:
             prob=np.random.normal(wiii, 0.1, 1)[0] #I want to try what sara suggested, lets keep sd=0.1 for now
             if random.uniform(0,1) <= prob:
                 new_rep=[x/2 for x in grid[cell].copy()]
-                variability= 1# np.random.normal(1, 0.2, 1)[0]
+                variability= 1# np.random.normal(1, 0.2, 1)[0] #or also from a beta distribution as we did later (between 0 and 1)
                 grid[cell]=[x*variability for x in new_rep]
                 cell_2=grid[cell].copy()
                 cell_2=[x*(2-variability) for x in new_rep]
@@ -88,7 +84,7 @@ for div_prob in prob_division:
         
         
         def global_signal():
-            p=[sum(x)/len(grid) for x in zip(*grid)]#we normalize dividing by grid len equivalent to dividing by od
+            p=[sum(x)*40/len(grid) for x in zip(*grid)]#we normalize dividing by grid len equivalent to dividing by od; *40 to plot the real amount of proteins (normalization in elowitz)
             return(p[0],p[1],p[2])
             #maybe I have to divide this by the number of cells
         
@@ -125,7 +121,7 @@ for div_prob in prob_division:
         plt.title("div_prob: " + format(div_prob) + " ; time_integration: " + format(integr))
         plt.xlabel("time (generations)")
         plt.ylabel("protein expression")
-        plt.savefig("data/fig_2" + format(div_prob) + format(integr) + ".png")
+        #plt.savefig("data_2_4/fig_" + format(div_prob) + format(integr) + ".png")
         plt.show()
         #to get an approximation of the amplitude towards the end, I just do the difference between the max and the min value of protein expression in the last 20 generations
         prot_1=max(proteins[0][80:])-min(proteins[0][80:])
@@ -134,22 +130,27 @@ for div_prob in prob_division:
         
         df[integr][div_prob]=max(prot_1,prot_2,prot_3)
         print(div_prob, "/", integr, "/",max(prot_1,prot_2,prot_3))
+
+#At the end we did not use that, but just in case
 sns.heatmap(df, annot=True, linewidths=.5, cmap= "tab10", center=1)
 #in this case for example would be better to plot the log to show better
 sns.heatmap(np.log(df), annot=True, linewidths=.5, center=0)
 #http://seaborn.pydata.org/generated/seaborn.heatmap.html
-df.to_csv("data/201014_divprob_integr.csv")
+df.to_csv("data_2_4/201019_alpha_div.csv")
 # check plt.contourf to represent, also surface plots (you give the matrix and they interpolate to be smoth)
-#data = pd.read_csv("data/200926.csv") 
+data = pd.read_csv("data_2_4/201019_alpha_div.csv") 
 #plt.contourf(data.iloc[:,1:], levels=[0,1,10,100,1000,10000,1000000],colors=["black","papayawhip","moccasin","khaki","goldenrod","darkgoldenrod"])
 #data = pd.read_csv("data/201014_alpha_integr.csv") 
 
-plt.contourf(df, levels=[0,1,10,100,1000,10000,100000],colors=["black","lightgray","beige","khaki","goldenrod","darkgoldenrod"])
-colores=["black","lightgray","beige","khaki","goldenrod","darkgoldenrod"]
+plt.contourf(data.iloc[:,1:], levels=[0,20,200,2000,20000,200000,2000000],colors=["black","beige","khaki","darkkhaki","olive","darkolivegreen"])
+colores=["black","beige","khaki","darkkhaki","olive","darkolivegreen"]
+#plt.plot([0, 5], [4.32,4.32], ':', lw=3,color="white")
+#plt.plot([2.7,2.7], [0,10], ':', lw=3,color="white")
 proxy = [plt.Rectangle((0,0),1,1,fc = pc,ec="black") for pc in colores]
-plt.legend(proxy, ["range(0-1e0)", "range(1e0-1e1)", "range(1e1-1e2)", "range (1e2-1e3)", "range(1e3-1e4)","range(1e4-1e5)"],framealpha=0.5, loc='upper right')
+plt.legend(proxy, ["range(0-2e1)", "range(2e1-2e2)", "range(2e2-2e3)", "range (2e3-2e4)", "range(2e4-2e5)","range(2e5-2e6)"],framealpha=0.5, loc='upper right')
 plt.xticks(range(6),["1e-3","1e-2","1e-1","1e0","1e1","1e2","1e3"], rotation=0)
 plt.yticks(range(10),prob_division)
-plt.xlabel("integration_time")
-plt.ylabel("div_prob")
-plt.title("Final amplitude of the oscillations")
+plt.xlabel("integration_time (arbitrary units)")
+plt.ylabel("alpha")
+plt.title("Final amplitude of the oscillations (proteins/cell)")
+plt.savefig('new.png', transparent=True)

@@ -1,0 +1,2 @@
+This folder contain scripts that might be of interest, but at the end we did not use to produce figures for our wiki for some reason of another.
+Anyway, if this is of interest of anyone, there you go. 
