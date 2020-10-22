@@ -31,7 +31,7 @@ def repressilator(z, t):
     p_cI=z[2]
     #
     alpha,n, nIPTG, Kd=(216,2.4,1, 1e-10) #Parameters from Elowitz et al 2000.Except for Kd that is taken fro Daber et al 2007
-    dp_lacIdt = (alpha/(1+p_cI**n))*(1 - IPTG_0**nIPTG/(Kd + IPTG_0**nIPTG)) #In case we want to coordinate with IPTG
+    dp_lacIdt = (alpha/(1+p_cI**n))*(1 - IPTG_0**nIPTG/(Kd**nIPTG + IPTG_0**nIPTG)) #In case we want to coordinate with IPTG
     
     #
     dp_tetRdt = alpha/(1+p_lacI**n)

@@ -1,5 +1,5 @@
 Welcome!
-Here you have the code for iGEM Unilausanne 2020 project. 
+Here you have the code for the dry lab part of the iGEM Unilausanne 2020 project. 
 You can check our project here: https://2020.igem.org/Team:UNILausanne
 In particular, this is the modelling section: https://2020.igem.org/Team:UNILausanne/Model
 Scripts are organised in folders similarly as the figures they produce are organized in our wiki page

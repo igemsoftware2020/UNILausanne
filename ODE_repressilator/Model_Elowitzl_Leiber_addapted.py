@@ -55,12 +55,12 @@ def repressilator(z, t):
     #LacI 
 
     dmRNA_lacIdt = alpha/(1 + p_cI**n) + alpha0 - mRNA_lacI
-    dp_lacIdt    = - beta* (p_lacI - mRNA_lacI ) * (1- IPTG_0**ni/(Kdi+IPTG_0**ni))
+    dp_lacIdt    = - beta* (p_lacI - mRNA_lacI ) * (1- IPTG_0**ni/(Kdi**ni + IPTG_0**ni))
     
     #TetR 
 
     dmRNA_tetRdt = alpha/(1 + p_lacI**n) + alpha0 - mRNA_tetR
-    dp_tetRdt    = - beta* (p_tetR- mRNA_tetR) * (1- aTc_0**na/(Kda+aTc_0**na))
+    dp_tetRdt    = - beta* (p_tetR- mRNA_tetR) * (1- aTc_0**na/(Kda**na + aTc_0**na))
 
     #CI
   
