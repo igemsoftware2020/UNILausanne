@@ -5,6 +5,9 @@ Created on Wed Jun 24 23:30:31 2020
 @author: pablo
 """
 
+#Different version of the repressilator without all the rescaling done in Elowitz and Leiber
+
+
 import numpy as np
 from scipy.integrate import odeint
 import matplotlib.pyplot as plt

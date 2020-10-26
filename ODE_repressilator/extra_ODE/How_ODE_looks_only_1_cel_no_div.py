@@ -5,6 +5,9 @@ Created on Thu Oct  8 22:43:16 2020
 
 @author: pablo
 """
+
+#MODEL TO INVESTIGATE HOW THE EQUATIONS IN OUR ODE MODEL LOOK WITHOUT CELL DIVISION
+
 #I import the packages I will use
 import numpy as np
 import random
@@ -12,6 +15,9 @@ import matplotlib.pyplot as plt
 import scipy
 from scipy.integrate import odeint
 from matplotlib import colors
+
+
+
 
 #################
 # Repressilator #
@@ -22,7 +28,7 @@ def repressilator(z, t):
     p_lacI=z[0]
     p_tetR=z[1]
     p_cI=z[2]
-    IPTG_0=0.00000005
+    IPTG_0=0#0.00000005
     alpha,n, nIPTG, Kd, IPTG_0=(216,2.4,1, 10^-10,0)
     dp_lacIdt = (alpha/(1+p_cI**n))*(1 - IPTG_0**nIPTG/(Kd + IPTG_0**nIPTG))#-0.0001*p_lacI
     

@@ -4,8 +4,14 @@ Created on Mon Jul  6 09:35:50 2020
 
 @author: pablo
 """
+
+#This is just a trial, we did not manage to get it working
+#the equations in this model are from: Transient Dynamics of Genetic Regulatory Networks (Bennet 2007)
+
 import gillespy2
 import numpy 
+
+
 
 class Repressilator(gillespy2.Model):
     def __init__(self, parameter_values=None):
