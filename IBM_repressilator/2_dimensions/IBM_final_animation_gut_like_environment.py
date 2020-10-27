@@ -30,8 +30,8 @@ def repressilator(z, t):
     p_tetR=z[1]
     p_cI=z[2]
     #
-    alpha,n, nIPTG, Kd=(216,2.4,1, 1e-10) #Parameters from Elowitz et al 2000.Except for Kd that is taken fro Daber et al 2007
-    dp_lacIdt = (alpha/(1+p_cI**n))*(1 - IPTG_0**nIPTG/(Kd**nIPTG + IPTG_0**nIPTG)) #In case we want to coordinate with IPTG
+    alpha,n, nIPTG, Kd=(216,2.4,1, 1.4e-6) #Parameters from Elowitz et al 2000.Except for Kd that is taken fro Daber et al 2007
+    dp_lacIdt = (alpha/(1+p_cI**n))*(1 - IPTG_0**nIPTG/(Kd**nIPTG + IPTG_0**nIPTG)) #In case we want to coordinate with IPTG, IPTG_0 is defined later in teh loop
     
     #
     dp_tetRdt = alpha/(1+p_lacI**n)
@@ -49,7 +49,7 @@ def repressilator(z, t):
 ## PARAMETERS ##
 #--------------------------------------------------------------------------------------------------------------
 
-IPTG_0=0
+
 death_rate=0
 grid_size=100 #here I set the grid size, which will be the number of rows and columsn of a square grid
 time_steps=151; time_step=0#numer of rounds and the initial round for the while loop
@@ -339,7 +339,7 @@ for mode in modes:
             while time_step<time_steps: #the simulation will run until the number of rounds previously set
                 #This in case we want to syncronize for a number of time steps with IPTG
                 if time_step<31:
-                    IPTG_0=0#0.00001
+                    IPTG_0=0.01 #M
                 else:
                     IPTG_0=0
                 grid_copy=np.copy(grid)#I copy the matrix to not loop and modify at the same time (this should be done in other way I think)
@@ -376,8 +376,8 @@ for mode in modes:
                     
                     plt.tight_layout()
                     plt.title("time: " + format(time_step))
-                    #Set were we want to save it
-                    plt.savefig("201020_3/plots_IPTG_50" + format(mode) + "_"+ format(div_prob) + "_" +format(death_rate)+"_" + format(in_cells)+ "_"+ format(time_step)+".png")
+                    #Set were we want to save it in the next line and remove the #
+                    #plt.savefig("201020_3/plots_IPTG_50" + format(mode) + "_"+ format(div_prob) + "_" +format(death_rate)+"_" + format(in_cells)+ "_"+ format(time_step)+".png")
                     plt.show()
                      
      
@@ -391,7 +391,8 @@ for mode in modes:
                     #plt.title("time: " + format(time_step), fontsize=14)
                     plt.xticks(fontsize=13)
                     plt.yticks(fontsize=13)
-                    plt.savefig("201020_3/azurin_IPTG_50" + format(mode) + "_"+ format(div_prob) + "_" +format(death_rate)+"_" + format(in_cells)+ "_"+ format(time_step)+".png")
+                    #Remove next # to save the plot
+                    #plt.savefig("201020_3/azurin_IPTG_50" + format(mode) + "_"+ format(div_prob) + "_" +format(death_rate)+"_" + format(in_cells)+ "_"+ format(time_step)+".png")
                   
                     plt.show()
                         

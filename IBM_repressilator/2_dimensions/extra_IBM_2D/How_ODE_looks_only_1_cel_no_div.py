@@ -28,8 +28,8 @@ def repressilator(z, t):
     p_lacI=z[0]
     p_tetR=z[1]
     p_cI=z[2]
-    IPTG_0=0#0.00000005
-    alpha,n, nIPTG, Kd, IPTG_0=(216,2.4,1, 10^-10,0)
+    IPTG_0=0.00001
+    alpha,n, nIPTG, Kd=(216,2.4,1, 1.4e-6)
     dp_lacIdt = (alpha/(1+p_cI**n))*(1 - IPTG_0**nIPTG/(Kd + IPTG_0**nIPTG))#-0.0001*p_lacI
     
     #

@@ -27,7 +27,7 @@ import matplotlib.pyplot as plt
 from statistics import mean
 
 
-
+#Note that the parametres for kdi and kda and na where changed the last day so might need to be adapted to these ones in the other scripts
 # PARAMETERS (those without units are adimentional)
 alpha0 = 0.216
 alpha  = 216
@@ -35,10 +35,10 @@ n      = 2
 beta   = 0.2
 IPTG_0 = 0
 aTc_0  = 0
-Kdi    = 1e-10 # M
-Kda    = 3.6e-10 # M
+Kdi    = 1.4e-6 # M
+Kda    = 1.5e-8 # M
 ni     = 1
-na     = 1
+na     = 2
 
 
 # We define the repressilartor as a function
